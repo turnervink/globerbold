@@ -1,0 +1,39 @@
+{
+  "uuid": "afdae417-f221-4673-80f6-19bce7aed6e8",
+  "shortName": "Glober Bold",
+  "longName": "Glober Bold",
+  "companyName": "Turner Vink",
+  "versionLabel": "3.0",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt"],
+  "watchapp": {
+    "watchface": true
+  },
+  "capabilities": [
+    "configurable"
+  ],
+  "appKeys": {
+    "showWeather": 0,
+    "showBattery": 1,
+    "useCelsius": 2
+  },
+  "resources": {
+    "media": [
+        {
+          "file": "fonts/Glober Bold.otf",
+          "name": "FONT_GLOBER_BOLD_40",
+          "type": "font"
+        },
+        {
+          "file": "fonts/Glober Light Italic.otf",
+          "name": "FONT_GLOBER_LIGHTI_18",
+          "type": "font"
+        },
+        {
+          "file": "fonts/Glober Light Italic.otf",
+          "name": "FONT_GLOBER_LIGHTI_14",
+          "type": "font"
+        }
+    ]
+  }
+}
