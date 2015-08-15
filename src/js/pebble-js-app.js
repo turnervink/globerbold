@@ -15,15 +15,15 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
 	console.log('Configuration page returned: ' + JSON.stringify(configData));
 
-	if (configData.backgroundColor) {
-		Pebble.sendAppMessage({
-			showWeather: configData.showWeather,
-			showBattery: configData.showBattery,
-			useCelsius: configData.useCelsius
-		}, function() {
-			console.log('Send successful!');
-		}, function() {
-			console.log('Send failed!');
-		});
-	}
+	
+	console.log('Sending data to Pebble.');
+	Pebble.sendAppMessage({
+		showWeather: configData.showWeather,
+		showBattery: configData.showBattery,
+		useCelsius: configData.useCelsius
+	}, function() {
+		console.log('Send successful!');
+	}, function() {
+		console.log('Send failed!');
+	});
 });

@@ -134,6 +134,14 @@ static void update_time() {
   	battery_handler(battery_state_service_peek());
 }
 
+static void update_layers() {
+	if (show_battery == false) {
+		layer_set_hidden(battery_layer, true);
+	} else {
+		layer_set_hidden(battery_layer, false);
+	}
+}
+
 /*static void check_settings() {
 	if (show_weather == true) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather!");
@@ -160,16 +168,28 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *use_celsius_t = dict_find(iter, KEY_USE_CELSIUS);
 
   if (show_weather_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_WEATHER received!");
+
+  	show_weather = show_weather_t->value->int8;
+
   	persist_write_int(KEY_SHOW_WEATHER, show_weather);
   }
 
   if (show_battery_t) {
-  	show_battery = show_battery_t->value->cstring;
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_BATTERY received!");
+
+  	show_battery = show_battery_t->value->int8;
 
   	persist_write_int(KEY_SHOW_BATTERY, show_battery);
+
+  	update_layers();
   }
 
   if (use_celsius_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_USE_CELSIUS received!");
+
+  	use_celsius = use_celsius_t->value->int8;
+
   	persist_write_int(KEY_USE_CELSIUS, use_celsius);
   }
 }
@@ -211,25 +231,21 @@ static void main_window_load(Window *window) {
 	layer_add_child(battery_layer, text_layer_get_layer(batt_layer));
 
 	update_time();
+	update_layers();
 	battery_handler(battery_state_service_peek());
 
   /*if (persist_read_bool(KEY_SHOW_WEATHER)) {
     	show_weather = persist_read_bool(KEY_SHOW_WEATHER);
-  }
+  }*/
 
   if (persist_read_bool(KEY_SHOW_BATTERY)) {
     show_battery = persist_read_bool(KEY_SHOW_BATTERY);
   }
 
-  if (persist_read_bool(KEY_USE_CELSIUS)) {
+  /*if (persist_read_bool(KEY_USE_CELSIUS)) {
     use_celsius = persist_read_bool(KEY_USE_CELSIUS);
   }*/
 
-  if (show_battery == true) {
-  	layer_set_hidden(battery_layer, false);
-  } else {
-  	layer_set_hidden(battery_layer, true);
-  }
 }
 
 static void main_window_unload(Window *window) {
