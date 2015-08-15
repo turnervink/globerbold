@@ -134,7 +134,7 @@ static void update_time() {
   	battery_handler(battery_state_service_peek());
 }
 
-static void check_settings() {
+/*static void check_settings() {
 	if (show_weather == true) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather!");
 	} else {
@@ -152,7 +152,7 @@ static void check_settings() {
 	} else {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Using Fahrenheit!");
 	}
-} 
+}*/
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *show_weather_t = dict_find(iter, KEY_SHOW_WEATHER);
@@ -161,24 +161,16 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
   if (show_weather_t) {
   	persist_write_int(KEY_SHOW_WEATHER, show_weather);
-
-  	check_settings();
   }
 
   if (show_battery_t) {
-  	show_battery = show_battery_t->value->int8;
+  	show_battery = show_battery_t->value->cstring;
 
   	persist_write_int(KEY_SHOW_BATTERY, show_battery);
-
-  	check_settings();
   }
 
   if (use_celsius_t) {
-  	use_celsius = use_celsius_t->value->int8;
-
   	persist_write_int(KEY_USE_CELSIUS, use_celsius);
-
-  	check_settings();
   }
 }
 
@@ -188,6 +180,9 @@ static void main_window_load(Window *window) {
 	time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_BOLD_40));
 	date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_18));
 	batt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_14));
+
+	weather_layer = layer_create(GRect(0, 0, 144, 168));
+	battery_layer = layer_create(GRect(0, 0, 144, 168));
 	
 	time_layer = text_layer_create(GRect(0, 50, 132, 163));
 	text_layer_set_text_color(time_layer, GColorWhite);
@@ -209,15 +204,17 @@ static void main_window_load(Window *window) {
 	text_layer_set_font(batt_layer, batt_font);
 	text_layer_set_text_alignment(batt_layer, GTextAlignmentRight);
 	
+	layer_add_child(window_get_root_layer(window), weather_layer);
+	layer_add_child(window_get_root_layer(window), battery_layer);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(time_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(date_layer));
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(batt_layer));
+	layer_add_child(battery_layer, text_layer_get_layer(batt_layer));
 
 	update_time();
 	battery_handler(battery_state_service_peek());
 
-	if (persist_read_bool(KEY_SHOW_WEATHER)) {
-    show_weather = persist_read_bool(KEY_SHOW_WEATHER);
+  /*if (persist_read_bool(KEY_SHOW_WEATHER)) {
+    	show_weather = persist_read_bool(KEY_SHOW_WEATHER);
   }
 
   if (persist_read_bool(KEY_SHOW_BATTERY)) {
@@ -226,6 +223,12 @@ static void main_window_load(Window *window) {
 
   if (persist_read_bool(KEY_USE_CELSIUS)) {
     use_celsius = persist_read_bool(KEY_USE_CELSIUS);
+  }*/
+
+  if (show_battery == true) {
+  	layer_set_hidden(battery_layer, false);
+  } else {
+  	layer_set_hidden(battery_layer, true);
   }
 }
 
@@ -259,7 +262,7 @@ static void init() {
   app_message_register_inbox_received(inbox_received_handler);
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
-  check_settings();
+  // check_settings();
 }
 
 static void deinit() {
