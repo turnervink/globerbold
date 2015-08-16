@@ -204,7 +204,6 @@ static void main_window_load(Window *window) {
 	layer_add_child(battery_layer, text_layer_get_layer(batt_layer));
 
 	update_time();
-	update_layers();
 	battery_handler(battery_state_service_peek());
 
   	if (persist_exists(KEY_SHOW_WEATHER)) {
