@@ -3,10 +3,13 @@
 #define KEY_SHOW_WEATHER 0
 #define KEY_SHOW_BATTERY 1
 #define KEY_USE_CELSIUS 2
+#define KEY_TEMPERATURE 3
+#define KEY_TEMPERATURE_IN_C 4
+#define KEY_CONDITIONS 5
 
 static Window *s_main_window;
-static TextLayer *time_layer, *date_layer, *batt_layer;
-static GFont *time_font, *date_font, *batt_font;
+static TextLayer *time_layer, *date_layer, *batt_layer, *temp_layer, *conditions_layer;
+static GFont *time_font, *date_font, *batt_font, *temp_font;
 static Layer *weather_layer, *battery_layer;
 static bool show_weather = true;
 static bool show_battery = true;
@@ -140,58 +143,12 @@ static void update_layers() {
 	} else {
 		layer_set_hidden(battery_layer, false);
 	}
-}
 
-/*static void check_settings() {
-	if (show_weather == true) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Weather!");
+	if (show_weather == false) {
+		layer_set_hidden(weather_layer, true);
 	} else {
-		APP_LOG(APP_LOG_LEVEL_INFO, "No weather!");
+		layer_set_hidden(weather_layer, false);
 	}
-
-	if (show_battery == true) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Battery!");
-	} else {
-		APP_LOG(APP_LOG_LEVEL_INFO, "No battery!");
-	}
-
-	if (use_celsius == true) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Using Celsius!");
-	} else {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Using Fahrenheit!");
-	}
-}*/
-
-static void inbox_received_handler(DictionaryIterator *iter, void *context) {
-  Tuple *show_weather_t = dict_find(iter, KEY_SHOW_WEATHER);
-  Tuple *show_battery_t = dict_find(iter, KEY_SHOW_BATTERY);
-  Tuple *use_celsius_t = dict_find(iter, KEY_USE_CELSIUS);
-
-  if (show_weather_t) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_WEATHER received!");
-
-  	show_weather = show_weather_t->value->int8;
-
-  	persist_write_int(KEY_SHOW_WEATHER, show_weather);
-  }
-
-  if (show_battery_t) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_BATTERY received!");
-
-  	show_battery = show_battery_t->value->int8;
-
-  	persist_write_int(KEY_SHOW_BATTERY, show_battery);
-
-  	update_layers();
-  }
-
-  if (use_celsius_t) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_USE_CELSIUS received!");
-
-  	use_celsius = use_celsius_t->value->int8;
-
-  	persist_write_int(KEY_USE_CELSIUS, use_celsius);
-  }
 }
 
 static void main_window_load(Window *window) {
@@ -200,6 +157,7 @@ static void main_window_load(Window *window) {
 	time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_BOLD_40));
 	date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_18));
 	batt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_14));
+	temp_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_12));
 
 	weather_layer = layer_create(GRect(0, 0, 144, 168));
 	battery_layer = layer_create(GRect(0, 0, 144, 168));
@@ -217,34 +175,112 @@ static void main_window_load(Window *window) {
 	text_layer_set_font(date_layer, date_font);
 	text_layer_set_text_alignment(date_layer, GTextAlignmentRight);
 	
-	
 	batt_layer = text_layer_create(GRect(0, 43, 130, 163));
 	text_layer_set_text_color(batt_layer, GColorWhite);
 	text_layer_set_background_color(batt_layer, GColorClear);
 	text_layer_set_font(batt_layer, batt_font);
 	text_layer_set_text_alignment(batt_layer, GTextAlignmentRight);
+
+	temp_layer = text_layer_create(GRect(0, 130, 130, 163));
+	text_layer_set_text_color(temp_layer, GColorWhite);
+	text_layer_set_background_color(temp_layer, GColorClear);
+	text_layer_set_font(temp_layer, temp_font);
+	text_layer_set_text_alignment(temp_layer, GTextAlignmentRight);
+	text_layer_set_text(temp_layer, "Updating");
+
+	conditions_layer = text_layer_create(GRect(0, 145, 130, 163));
+	text_layer_set_text_color(conditions_layer, GColorWhite);
+	text_layer_set_background_color(conditions_layer, GColorClear);
+	text_layer_set_font(conditions_layer, batt_font);
+	text_layer_set_text_alignment(conditions_layer, GTextAlignmentRight);
+	text_layer_set_text(conditions_layer, "Weather");
 	
 	layer_add_child(window_get_root_layer(window), weather_layer);
 	layer_add_child(window_get_root_layer(window), battery_layer);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(time_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(date_layer));
+	layer_add_child(weather_layer, text_layer_get_layer(temp_layer));
+	layer_add_child(weather_layer, text_layer_get_layer(conditions_layer));
 	layer_add_child(battery_layer, text_layer_get_layer(batt_layer));
 
 	update_time();
 	update_layers();
 	battery_handler(battery_state_service_peek());
 
-  /*if (persist_read_bool(KEY_SHOW_WEATHER)) {
+  	if (persist_read_bool(KEY_SHOW_WEATHER)) {
     	show_weather = persist_read_bool(KEY_SHOW_WEATHER);
-  }*/
+  	}
 
-  if (persist_read_bool(KEY_SHOW_BATTERY)) {
-    show_battery = persist_read_bool(KEY_SHOW_BATTERY);
+  	if (persist_read_bool(KEY_SHOW_BATTERY)) {
+  	  show_battery = persist_read_bool(KEY_SHOW_BATTERY);
+  	}
+
+  	if (persist_read_bool(KEY_USE_CELSIUS)) {
+  	  use_celsius = persist_read_bool(KEY_USE_CELSIUS);
+  	}
+
+}
+
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+  static char temp_buffer[15];
+  static char temp_c_buffer[15];
+  static char conditions_buffer[100];
+
+  Tuple *show_weather_t = dict_find(iter, KEY_SHOW_WEATHER);
+  Tuple *show_battery_t = dict_find(iter, KEY_SHOW_BATTERY);
+  Tuple *use_celsius_t = dict_find(iter, KEY_USE_CELSIUS);
+  Tuple *temperature_t = dict_find(iter, KEY_TEMPERATURE);
+  Tuple *temperature_in_c_t = dict_find(iter, KEY_TEMPERATURE_IN_C);
+  Tuple *conditions_t = dict_find(iter, KEY_CONDITIONS);
+
+  if (show_weather_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_WEATHER received!");
+
+  	show_weather = show_weather_t->value->int8;
+
+  	persist_write_int(KEY_SHOW_WEATHER, show_weather);
   }
 
-  /*if (persist_read_bool(KEY_USE_CELSIUS)) {
-    use_celsius = persist_read_bool(KEY_USE_CELSIUS);
-  }*/
+  if (show_battery_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_BATTERY received!");
+
+  	show_battery = show_battery_t->value->int8;
+
+  	persist_write_int(KEY_SHOW_BATTERY, show_battery);
+  }
+
+  if (use_celsius_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_USE_CELSIUS received!");
+
+  	use_celsius = use_celsius_t->value->int8;
+
+  	persist_write_int(KEY_USE_CELSIUS, use_celsius);
+  }
+
+  if (temperature_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_TEMPERATURE received!");
+
+  	snprintf(temp_buffer, sizeof(temp_buffer), "%d degrees", (int)temperature_t->value->int32);
+  }
+
+  if (temperature_in_c_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_TEMPERATURE_IN_C received!");
+
+  	snprintf(temp_c_buffer, sizeof(temp_c_buffer), "%d degrees", (int)temperature_in_c_t->value->int32);
+  }
+
+  if (conditions_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_CONDITIONS received!");
+
+  	snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions_t->value->cstring);
+  	text_layer_set_text(conditions_layer, conditions_buffer);
+  }
+
+  if (use_celsius == true) {
+  	text_layer_set_text(temp_layer, temp_c_buffer);
+  } else {
+  	text_layer_set_text(temp_layer, temp_buffer);
+  }
 
 }
 
