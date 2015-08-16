@@ -90,7 +90,7 @@ Pebble.addEventListener('appmessage',
 // Configuration
 
 Pebble.addEventListener('showConfiguration', function() {
-	var url = 'https://dl.dropboxusercontent.com/u/14971687/Glober%20Bold/config/index.html';
+	var url = 'http://turnervink.github.io/globerbold-config/';
 
 	console.log('Showing configuration page: ' + url);
 
