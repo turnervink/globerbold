@@ -207,18 +207,19 @@ static void main_window_load(Window *window) {
 	update_layers();
 	battery_handler(battery_state_service_peek());
 
-  	if (persist_read_bool(KEY_SHOW_WEATHER)) {
-    	show_weather = persist_read_bool(KEY_SHOW_WEATHER);
+  	if (persist_exists(KEY_SHOW_WEATHER)) {
+      show_weather = persist_read_int(KEY_SHOW_WEATHER);
   	}
 
-  	if (persist_read_bool(KEY_SHOW_BATTERY)) {
-  	  show_battery = persist_read_bool(KEY_SHOW_BATTERY);
+  	if (persist_exists(KEY_SHOW_BATTERY)) {
+  	  show_battery = persist_read_int(KEY_SHOW_BATTERY);
   	}
 
-  	if (persist_read_bool(KEY_USE_CELSIUS)) {
-  	  use_celsius = persist_read_bool(KEY_USE_CELSIUS);
+  	if (persist_exists(KEY_USE_CELSIUS)) {
+  	  use_celsius = persist_read_int(KEY_USE_CELSIUS);
   	}
 
+  	update_layers();
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
@@ -247,6 +248,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   	show_battery = show_battery_t->value->int8;
 
   	persist_write_int(KEY_SHOW_BATTERY, show_battery);
+
   }
 
   if (use_celsius_t) {
@@ -281,6 +283,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   } else {
   	text_layer_set_text(temp_layer, temp_buffer);
   }
+
+  update_layers();
 
 }
 

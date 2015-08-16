@@ -90,7 +90,7 @@ Pebble.addEventListener('appmessage',
 // Configuration
 
 Pebble.addEventListener('showConfiguration', function() {
-	var url = 'http://346283b4.ngrok.com/';
+	var url = 'http://346283b4.ngrok.com';
 
 	console.log('Showing configuration page: ' + url);
 
