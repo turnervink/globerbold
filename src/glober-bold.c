@@ -6,14 +6,16 @@
 #define KEY_TEMPERATURE 3
 #define KEY_TEMPERATURE_IN_C 4
 #define KEY_CONDITIONS 5
+#define KEY_SHAKE_FOR_WEATHER 6
 
 static Window *s_main_window;
-static TextLayer *time_layer, *date_layer, *batt_layer, *temp_layer, *conditions_layer;
+static TextLayer *time_layer, *date_layer, *batt_layer, *temp_layer, *conditions_layer, *temp_layer_unanimated, *conditions_layer_unanimated;
 static GFont *time_font, *date_font, *batt_font, *temp_font;
-static Layer *weather_layer, *battery_layer;
-static bool show_weather = true;
-static bool show_battery = true;
-static bool use_celsius = false;
+static Layer *weather_layer, *battery_layer, *weather_layer_unanimated;
+static bool show_weather = 1;
+static bool show_battery = 1;
+static bool use_celsius = 0;
+static bool shake_for_weather = 1;
 
 static void battery_handler(BatteryChargeState new_state) {
   static char s_battery_buffer[32];
@@ -97,6 +99,30 @@ static void battery_handler(BatteryChargeState new_state) {
 	}
 }
 
+void on_animation_stopped(Animation *anim, bool finished, void *context) {
+    //Free the memory used by the Animation
+    property_animation_destroy((PropertyAnimation*) anim);
+}
+ 
+void animate_layer(Layer *layer, GRect *start, GRect *finish, int duration, int delay) {
+    //Declare animation
+    PropertyAnimation *anim = property_animation_create_layer_frame(layer, start, finish);
+ 
+    //Set characteristics
+    animation_set_duration((Animation*) anim, duration);
+    animation_set_delay((Animation*) anim, delay);
+ 
+    //Set stopped handler to free memory
+    AnimationHandlers handlers = {
+        //The reference to the stopped handler is the only one in the array
+        .stopped = (AnimationStoppedHandler) on_animation_stopped
+    };
+    animation_set_handlers((Animation*) anim, handlers, NULL);
+ 
+    //Start animation!
+    animation_schedule((Animation*) anim);
+}
+
 static void update_time() {
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
@@ -140,12 +166,7 @@ static void update_time() {
 static void update_layers() {
   if (show_battery == 0) {
 	layer_set_hidden(battery_layer, true);
-	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is 0");
-  } else if (show_battery == 1) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is 1");
-	layer_set_hidden(battery_layer, false);
   } else {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is ?");
 	layer_set_hidden(battery_layer, false);
   }
 
@@ -154,6 +175,36 @@ static void update_layers() {
   } else {
 	layer_set_hidden(weather_layer, false);
   }
+
+  if (shake_for_weather == 0) {
+  	layer_set_hidden(weather_layer, true);
+  	layer_set_hidden(weather_layer_unanimated, false);
+  } else {
+  	layer_set_hidden(weather_layer, false);
+  	layer_set_hidden(weather_layer_unanimated, true);
+  }
+}
+
+static void animate_layers() {
+	// Temperature layer
+
+	GRect tins = GRect(0, 178, 130, 163);
+	GRect tinf = GRect(0, 130, 130, 163);
+	animate_layer(text_layer_get_layer(temp_layer), &tins, &tinf, 1000, 0);
+
+	GRect touts = GRect(0, 130, 130, 163);
+	GRect toutf = GRect(0, 178, 130, 163);
+	animate_layer(text_layer_get_layer(temp_layer), &touts, &toutf, 1000, 5000);
+
+	// Conditions layer
+
+	GRect wins = GRect(0, 187, 130, 163);
+	GRect winf = GRect(0, 145, 130, 163);
+	animate_layer(text_layer_get_layer(conditions_layer), &wins, &winf, 1000, 0);
+
+	GRect wouts = GRect(0, 145, 130, 163);
+	GRect woutf = GRect(0, 187, 130, 163);
+	animate_layer(text_layer_get_layer(conditions_layer), &wouts, &woutf, 1000, 5000);
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
@@ -167,6 +218,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *temperature_t = dict_find(iter, KEY_TEMPERATURE);
   Tuple *temperature_in_c_t = dict_find(iter, KEY_TEMPERATURE_IN_C);
   Tuple *conditions_t = dict_find(iter, KEY_CONDITIONS);
+  Tuple *shake_for_weather_t = dict_find(iter, KEY_SHAKE_FOR_WEATHER);
 
   if (show_weather_t) {
   	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_WEATHER received!");
@@ -193,6 +245,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   	persist_write_int(KEY_USE_CELSIUS, use_celsius);
   }
 
+  if (shake_for_weather_t) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHAKE_FOR_WEATHER received!");
+
+  	shake_for_weather = shake_for_weather_t->value->int8;
+
+  	persist_write_int(KEY_SHAKE_FOR_WEATHER, shake_for_weather);
+  }
+
   if (temperature_t) {
   	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_TEMPERATURE received!");
 
@@ -210,18 +270,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
   	snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions_t->value->cstring);
   	text_layer_set_text(conditions_layer, conditions_buffer);
+  	text_layer_set_text(conditions_layer_unanimated, conditions_buffer);
   }
 
   if (show_battery == 0) {
 	layer_set_hidden(battery_layer, true);
-	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is 0");
-  } else if (show_battery == 1) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is 1");
-	layer_set_hidden(battery_layer, false);
   } else {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is ?");
 	layer_set_hidden(battery_layer, false);
-  }
+  } 
 
   if (show_weather == 0) {
 	layer_set_hidden(weather_layer, true);
@@ -229,10 +285,20 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	layer_set_hidden(weather_layer, false);
   }
 
-  if (use_celsius == 0) {
+  if (shake_for_weather == 0) {
+  	layer_set_hidden(weather_layer, true);
+  	layer_set_hidden(weather_layer_unanimated, false);
+  } else {
+  	layer_set_hidden(weather_layer, false);
+  	layer_set_hidden(weather_layer_unanimated, true);
+  }
+
+  if (use_celsius == 1) {
   	text_layer_set_text(temp_layer, temp_c_buffer);
+  	text_layer_set_text(temp_layer_unanimated, temp_c_buffer);
   } else {
   	text_layer_set_text(temp_layer, temp_buffer);
+  	text_layer_set_text(temp_layer_unanimated, temp_buffer);
   }
 }
 
@@ -246,6 +312,7 @@ static void main_window_load(Window *window) {
 
 	weather_layer = layer_create(GRect(0, 0, 144, 168));
 	battery_layer = layer_create(GRect(0, 0, 144, 168));
+	weather_layer_unanimated = layer_create(GRect(0, 0, 144, 168));
 	
 	time_layer = text_layer_create(GRect(0, 50, 132, 163));
 	text_layer_set_text_color(time_layer, GColorWhite);
@@ -265,26 +332,43 @@ static void main_window_load(Window *window) {
 	text_layer_set_font(batt_layer, batt_font);
 	text_layer_set_text_alignment(batt_layer, GTextAlignmentRight);
 
-	temp_layer = text_layer_create(GRect(0, 130, 130, 163));
+	temp_layer = text_layer_create(GRect(0, 178, 130, 163));
 	text_layer_set_text_color(temp_layer, GColorWhite);
 	text_layer_set_background_color(temp_layer, GColorClear);
 	text_layer_set_font(temp_layer, temp_font);
 	text_layer_set_text_alignment(temp_layer, GTextAlignmentRight);
 	text_layer_set_text(temp_layer, "Updating");
 
-	conditions_layer = text_layer_create(GRect(0, 145, 130, 163));
+	conditions_layer = text_layer_create(GRect(0, 187, 130, 163));
 	text_layer_set_text_color(conditions_layer, GColorWhite);
 	text_layer_set_background_color(conditions_layer, GColorClear);
 	text_layer_set_font(conditions_layer, batt_font);
 	text_layer_set_text_alignment(conditions_layer, GTextAlignmentRight);
 	text_layer_set_text(conditions_layer, "Weather");
+
+	temp_layer_unanimated = text_layer_create(GRect(0, 130, 130, 163));
+	text_layer_set_text_color(temp_layer_unanimated, GColorWhite);
+	text_layer_set_background_color(temp_layer_unanimated, GColorClear);
+	text_layer_set_font(temp_layer_unanimated, temp_font);
+	text_layer_set_text_alignment(temp_layer_unanimated, GTextAlignmentRight);
+	text_layer_set_text(temp_layer_unanimated, "Updating");
+
+	conditions_layer_unanimated = text_layer_create(GRect(0, 145, 130, 163));
+	text_layer_set_text_color(conditions_layer_unanimated, GColorWhite);
+	text_layer_set_background_color(conditions_layer_unanimated, GColorClear);
+	text_layer_set_font(conditions_layer_unanimated, batt_font);
+	text_layer_set_text_alignment(conditions_layer_unanimated, GTextAlignmentRight);
+	text_layer_set_text(conditions_layer_unanimated, "Weather");
 	
 	layer_add_child(window_get_root_layer(window), weather_layer);
+	layer_add_child(window_get_root_layer(window), weather_layer_unanimated);
 	layer_add_child(window_get_root_layer(window), battery_layer);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(time_layer));
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(date_layer));
 	layer_add_child(weather_layer, text_layer_get_layer(temp_layer));
 	layer_add_child(weather_layer, text_layer_get_layer(conditions_layer));
+	layer_add_child(weather_layer_unanimated, text_layer_get_layer(temp_layer_unanimated));
+	layer_add_child(weather_layer_unanimated, text_layer_get_layer(conditions_layer_unanimated));
 	layer_add_child(battery_layer, text_layer_get_layer(batt_layer));
 
   	if (persist_exists(KEY_SHOW_WEATHER)) {
@@ -299,6 +383,10 @@ static void main_window_load(Window *window) {
   	  use_celsius = persist_read_int(KEY_USE_CELSIUS);
   	}
 
+  	if (persist_exists(KEY_SHAKE_FOR_WEATHER)) {
+  	  shake_for_weather = persist_read_int(KEY_SHAKE_FOR_WEATHER);
+  	}
+
   	update_layers();
   	update_time();
 	battery_handler(battery_state_service_peek());
@@ -308,14 +396,30 @@ static void main_window_unload(Window *window) {
 	fonts_unload_custom_font(time_font);
 	fonts_unload_custom_font(date_font);
 	fonts_unload_custom_font(batt_font);
+	fonts_unload_custom_font(temp_font);
 	
 	text_layer_destroy(time_layer);
 	text_layer_destroy(date_layer);
 	text_layer_destroy(batt_layer);
+	text_layer_destroy(temp_layer);
+	text_layer_destroy(temp_layer_unanimated);
+	text_layer_destroy(conditions_layer);
+	text_layer_destroy(conditions_layer_unanimated);
+	layer_destroy(weather_layer);
+	layer_destroy(weather_layer_unanimated);
+	layer_destroy(battery_layer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
+}
+
+static void tap_handler(AccelAxisType axis, int32_t direction) {
+	if (shake_for_weather == 0) {
+		// Do not animate
+	} else {
+		animate_layers();
+	}
 }
 
 static void init() {
@@ -330,6 +434,7 @@ static void init() {
 	
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   battery_state_service_subscribe(battery_handler);
+  accel_tap_service_subscribe(tap_handler);
 
   app_message_register_inbox_received(inbox_received_handler);
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());

@@ -15,7 +15,7 @@ var xhrRequest = function (url, type, callback) {
 
 function locationSuccess(pos) {
   // Construct URL
-	var url = 'https://api.forecast.io/forecast/6a987aa0f3fdb98e6582163f2c9c324f/' + 
+	var url = 'https://api.forecast.io/forecast/apikey/' + 
 	pos.coords.latitude + ',' + pos.coords.longitude;
 	
 	console.log("Lat is " + pos.coords.latitude);
@@ -41,8 +41,8 @@ function locationSuccess(pos) {
       // Assemble dictionary using our keys
       var dictionary = {
         "KEY_TEMPERATURE": temperature,
-		"KEY_TEMPERATURE_IN_C": temperaturec,
-		"KEY_CONDITIONS": conditions,
+		    "KEY_TEMPERATURE_IN_C": temperaturec,
+		    "KEY_CONDITIONS": conditions,
       };
 
       // Send to Pebble
@@ -73,7 +73,7 @@ function getWeather() {
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
-    console.log('PebbleKit JS ready!');
+    console.log('PebbleKit JS ready! Weather');
 
     // Get the initial weather
     getWeather();
@@ -107,7 +107,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	Pebble.sendAppMessage({
 		showWeather: configData.showWeather ? 1 : 0,
 		showBattery: configData.showBattery ? 1 : 0,
-		useCelsius: configData.useCelsius ? 1 : 0
+		useCelsius: configData.useCelsius ? 1 : 0,
+    shakeWeather: configData.shakeWeather ? 1 : 0
 	}, function() {
 		console.log('Send successful!');
 	}, function() {

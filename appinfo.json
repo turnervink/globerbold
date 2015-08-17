@@ -1,5 +1,5 @@
 {
-  "uuid": "afdae417-f221-4673-80f6-19bce7aed6e8",
+  "uuid": "5d2f682e-601b-4ffe-b168-26e43b72e22e",
   "shortName": "Glober Bold",
   "longName": "Glober Bold",
   "companyName": "Turner Vink",
@@ -19,7 +19,8 @@
     "useCelsius": 2,
     "KEY_TEMPERATURE": 3,
     "KEY_TEMPERATURE_IN_C": 4,
-    "KEY_CONDITIONS": 5
+    "KEY_CONDITIONS": 5,
+    "shakeWeather": 6
   },
   "resources": {
     "media": [
