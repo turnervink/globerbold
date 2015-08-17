@@ -138,87 +138,22 @@ static void update_time() {
 }
 
 static void update_layers() {
-	if (show_battery == false) {
-		layer_set_hidden(battery_layer, true);
-	} else {
-		layer_set_hidden(battery_layer, false);
-	}
+  if (show_battery == 0) {
+	layer_set_hidden(battery_layer, true);
+	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is 0");
+  } else if (show_battery == 1) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is 1");
+	layer_set_hidden(battery_layer, false);
+  } else {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is ?");
+	layer_set_hidden(battery_layer, false);
+  }
 
-	if (show_weather == false) {
-		layer_set_hidden(weather_layer, true);
-	} else {
-		layer_set_hidden(weather_layer, false);
-	}
-}
-
-static void main_window_load(Window *window) {
-	window_set_background_color(s_main_window, GColorBlack);
-
-	time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_BOLD_40));
-	date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_18));
-	batt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_14));
-	temp_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_12));
-
-	weather_layer = layer_create(GRect(0, 0, 144, 168));
-	battery_layer = layer_create(GRect(0, 0, 144, 168));
-	
-	time_layer = text_layer_create(GRect(0, 50, 132, 163));
-	text_layer_set_text_color(time_layer, GColorWhite);
-	text_layer_set_background_color(time_layer, GColorClear);
-	text_layer_set_font(time_layer, time_font);
-	text_layer_set_text_alignment(time_layer, GTextAlignmentRight);
-	
-	
-	date_layer = text_layer_create(GRect(0, 90, 130, 163));
-	text_layer_set_text_color(date_layer, GColorWhite);
-	text_layer_set_background_color(date_layer, GColorClear);
-	text_layer_set_font(date_layer, date_font);
-	text_layer_set_text_alignment(date_layer, GTextAlignmentRight);
-	
-	batt_layer = text_layer_create(GRect(0, 43, 130, 163));
-	text_layer_set_text_color(batt_layer, GColorWhite);
-	text_layer_set_background_color(batt_layer, GColorClear);
-	text_layer_set_font(batt_layer, batt_font);
-	text_layer_set_text_alignment(batt_layer, GTextAlignmentRight);
-
-	temp_layer = text_layer_create(GRect(0, 130, 130, 163));
-	text_layer_set_text_color(temp_layer, GColorWhite);
-	text_layer_set_background_color(temp_layer, GColorClear);
-	text_layer_set_font(temp_layer, temp_font);
-	text_layer_set_text_alignment(temp_layer, GTextAlignmentRight);
-	text_layer_set_text(temp_layer, "Updating");
-
-	conditions_layer = text_layer_create(GRect(0, 145, 130, 163));
-	text_layer_set_text_color(conditions_layer, GColorWhite);
-	text_layer_set_background_color(conditions_layer, GColorClear);
-	text_layer_set_font(conditions_layer, batt_font);
-	text_layer_set_text_alignment(conditions_layer, GTextAlignmentRight);
-	text_layer_set_text(conditions_layer, "Weather");
-	
-	layer_add_child(window_get_root_layer(window), weather_layer);
-	layer_add_child(window_get_root_layer(window), battery_layer);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(time_layer));
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(date_layer));
-	layer_add_child(weather_layer, text_layer_get_layer(temp_layer));
-	layer_add_child(weather_layer, text_layer_get_layer(conditions_layer));
-	layer_add_child(battery_layer, text_layer_get_layer(batt_layer));
-
-	update_time();
-	battery_handler(battery_state_service_peek());
-
-  	if (persist_exists(KEY_SHOW_WEATHER)) {
-      show_weather = persist_read_int(KEY_SHOW_WEATHER);
-  	}
-
-  	if (persist_exists(KEY_SHOW_BATTERY)) {
-  	  show_battery = persist_read_int(KEY_SHOW_BATTERY);
-  	}
-
-  	if (persist_exists(KEY_USE_CELSIUS)) {
-  	  use_celsius = persist_read_int(KEY_USE_CELSIUS);
-  	}
-
-  	update_layers();
+  if (show_weather == 0) {
+	layer_set_hidden(weather_layer, true);
+  } else {
+	layer_set_hidden(weather_layer, false);
+  }
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
@@ -277,14 +212,96 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   	text_layer_set_text(conditions_layer, conditions_buffer);
   }
 
-  if (use_celsius == true) {
+  if (show_battery == 0) {
+	layer_set_hidden(battery_layer, true);
+	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is 0");
+  } else if (show_battery == 1) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is 1");
+	layer_set_hidden(battery_layer, false);
+  } else {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "show_battery is ?");
+	layer_set_hidden(battery_layer, false);
+  }
+
+  if (show_weather == 0) {
+	layer_set_hidden(weather_layer, true);
+  } else {
+	layer_set_hidden(weather_layer, false);
+  }
+
+  if (use_celsius == 0) {
   	text_layer_set_text(temp_layer, temp_c_buffer);
   } else {
   	text_layer_set_text(temp_layer, temp_buffer);
   }
+}
 
-  update_layers();
+static void main_window_load(Window *window) {
+	window_set_background_color(s_main_window, GColorBlack);
 
+	time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_BOLD_40));
+	date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_18));
+	batt_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_14));
+	temp_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_GLOBER_LIGHTI_12));
+
+	weather_layer = layer_create(GRect(0, 0, 144, 168));
+	battery_layer = layer_create(GRect(0, 0, 144, 168));
+	
+	time_layer = text_layer_create(GRect(0, 50, 132, 163));
+	text_layer_set_text_color(time_layer, GColorWhite);
+	text_layer_set_background_color(time_layer, GColorClear);
+	text_layer_set_font(time_layer, time_font);
+	text_layer_set_text_alignment(time_layer, GTextAlignmentRight);
+	
+	date_layer = text_layer_create(GRect(0, 90, 130, 163));
+	text_layer_set_text_color(date_layer, GColorWhite);
+	text_layer_set_background_color(date_layer, GColorClear);
+	text_layer_set_font(date_layer, date_font);
+	text_layer_set_text_alignment(date_layer, GTextAlignmentRight);
+	
+	batt_layer = text_layer_create(GRect(0, 43, 130, 163));
+	text_layer_set_text_color(batt_layer, GColorWhite);
+	text_layer_set_background_color(batt_layer, GColorClear);
+	text_layer_set_font(batt_layer, batt_font);
+	text_layer_set_text_alignment(batt_layer, GTextAlignmentRight);
+
+	temp_layer = text_layer_create(GRect(0, 130, 130, 163));
+	text_layer_set_text_color(temp_layer, GColorWhite);
+	text_layer_set_background_color(temp_layer, GColorClear);
+	text_layer_set_font(temp_layer, temp_font);
+	text_layer_set_text_alignment(temp_layer, GTextAlignmentRight);
+	text_layer_set_text(temp_layer, "Updating");
+
+	conditions_layer = text_layer_create(GRect(0, 145, 130, 163));
+	text_layer_set_text_color(conditions_layer, GColorWhite);
+	text_layer_set_background_color(conditions_layer, GColorClear);
+	text_layer_set_font(conditions_layer, batt_font);
+	text_layer_set_text_alignment(conditions_layer, GTextAlignmentRight);
+	text_layer_set_text(conditions_layer, "Weather");
+	
+	layer_add_child(window_get_root_layer(window), weather_layer);
+	layer_add_child(window_get_root_layer(window), battery_layer);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(time_layer));
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(date_layer));
+	layer_add_child(weather_layer, text_layer_get_layer(temp_layer));
+	layer_add_child(weather_layer, text_layer_get_layer(conditions_layer));
+	layer_add_child(battery_layer, text_layer_get_layer(batt_layer));
+
+  	if (persist_exists(KEY_SHOW_WEATHER)) {
+      show_weather = persist_read_int(KEY_SHOW_WEATHER);
+  	}
+
+  	if (persist_exists(KEY_SHOW_BATTERY)) {
+  	  show_battery = persist_read_int(KEY_SHOW_BATTERY);
+  	}
+
+  	if (persist_exists(KEY_USE_CELSIUS)) {
+  	  use_celsius = persist_read_int(KEY_USE_CELSIUS);
+  	}
+
+  	update_layers();
+  	update_time();
+	battery_handler(battery_state_service_peek());
 }
 
 static void main_window_unload(Window *window) {

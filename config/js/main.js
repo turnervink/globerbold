@@ -12,6 +12,7 @@ function submitHandler() {
 		console.log('Submit');
 
 		var return_to = getQueryParam('return_to', 'pebblejs://close#');
+		var location = "pebblejs://close#";
 		document.location = return_to + encodeURIComponent(JSON.stringify(getAndStoreConfigData()));
 	});
 }
@@ -34,9 +35,9 @@ function getAndStoreConfigData() {
 	var $useCelsius = $('#useCelsius');
 
 	var options = {
-		showWeather: $showWeather[0].checked,
-		showBattery: $showBattery[0].checked,
-		useCelsius: $useCelsius[0].checked,
+		showWeather: configData.showWeather ? 1:0,
+		showBattery: configDara.showBattery ? 1:0,
+		useCelsius: configData.useCelsius ? 1:0,
 	};
 
 	localStorage.showWeather = options.showWeather;

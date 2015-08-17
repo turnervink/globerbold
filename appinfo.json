@@ -1,5 +1,5 @@
 {
-  "uuid": "5d2f682e-601b-4ffe-b168-26e43b72e22e",
+  "uuid": "afdae417-f221-4673-80f6-19bce7aed6e8",
   "shortName": "Glober Bold",
   "longName": "Glober Bold",
   "companyName": "Turner Vink",
@@ -10,7 +10,8 @@
     "watchface": true
   },
   "capabilities": [
-    "configurable"
+    "configurable",
+    "location"
   ],
   "appKeys": {
     "showWeather": 0,
