@@ -105,9 +105,9 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	
 	console.log('Sending data to Pebble.');
 	Pebble.sendAppMessage({
-		showWeather: configData.showWeather,
-		showBattery: configData.showBattery,
-		useCelsius: configData.useCelsius
+		showWeather: configData.showWeather ? 1 : 0,
+		showBattery: configData.showBattery ? 1 : 0,
+		useCelsius: configData.useCelsius ? 1 : 0
 	}, function() {
 		console.log('Send successful!');
 	}, function() {

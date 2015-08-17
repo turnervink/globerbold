@@ -35,9 +35,9 @@ function getAndStoreConfigData() {
 	var $useCelsius = $('#useCelsius');
 
 	var options = {
-		showWeather: configData.showWeather ? 1:0,
-		showBattery: configDara.showBattery ? 1:0,
-		useCelsius: configData.useCelsius ? 1:0,
+		showWeather: $showWeather[0].checked,
+		showBattery: $showBattery[0].checked,
+		useCelsius: $useCelsius[0].checked,
 	};
 
 	localStorage.showWeather = options.showWeather;
