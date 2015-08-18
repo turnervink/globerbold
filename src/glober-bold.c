@@ -1,6 +1,5 @@
 #include <pebble.h>
 
-// #define KEY_SHOW_WEATHER 0
 #define KEY_SHOW_BATTERY 1
 #define KEY_USE_CELSIUS 2
 #define KEY_TEMPERATURE 3
@@ -12,7 +11,6 @@ static Window *s_main_window;
 static TextLayer *time_layer, *date_layer, *batt_layer, *temp_layer, *conditions_layer, *temp_layer_unanimated, *conditions_layer_unanimated;
 static GFont *time_font, *date_font, *batt_font, *temp_font;
 static Layer *weather_layer, *battery_layer, *weather_layer_unanimated;
-// static bool show_weather = 1;
 static bool show_battery = 1;
 static bool use_celsius = 0;
 static bool shake_for_weather = 1;

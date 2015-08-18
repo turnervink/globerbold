@@ -14,7 +14,6 @@
     "location"
   ],
   "appKeys": {
-    "showWeather": 0,
     "showBattery": 1,
     "useCelsius": 2,
     "KEY_TEMPERATURE": 3,
