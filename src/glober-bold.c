@@ -1,6 +1,6 @@
 #include <pebble.h>
 
-#define KEY_SHOW_WEATHER 0
+// #define KEY_SHOW_WEATHER 0
 #define KEY_SHOW_BATTERY 1
 #define KEY_USE_CELSIUS 2
 #define KEY_TEMPERATURE 3
@@ -12,7 +12,7 @@ static Window *s_main_window;
 static TextLayer *time_layer, *date_layer, *batt_layer, *temp_layer, *conditions_layer, *temp_layer_unanimated, *conditions_layer_unanimated;
 static GFont *time_font, *date_font, *batt_font, *temp_font;
 static Layer *weather_layer, *battery_layer, *weather_layer_unanimated;
-static bool show_weather = 1;
+// static bool show_weather = 1;
 static bool show_battery = 1;
 static bool use_celsius = 0;
 static bool shake_for_weather = 1;
@@ -170,12 +170,6 @@ static void update_layers() {
 	layer_set_hidden(battery_layer, false);
   }
 
-  if (show_weather == 0) {
-	layer_set_hidden(weather_layer, true);
-  } else {
-	layer_set_hidden(weather_layer, false);
-  }
-
   if (shake_for_weather == 0) {
   	layer_set_hidden(weather_layer, true);
   	layer_set_hidden(weather_layer_unanimated, false);
@@ -212,21 +206,12 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   static char temp_c_buffer[15];
   static char conditions_buffer[100];
 
-  Tuple *show_weather_t = dict_find(iter, KEY_SHOW_WEATHER);
   Tuple *show_battery_t = dict_find(iter, KEY_SHOW_BATTERY);
   Tuple *use_celsius_t = dict_find(iter, KEY_USE_CELSIUS);
   Tuple *temperature_t = dict_find(iter, KEY_TEMPERATURE);
   Tuple *temperature_in_c_t = dict_find(iter, KEY_TEMPERATURE_IN_C);
   Tuple *conditions_t = dict_find(iter, KEY_CONDITIONS);
   Tuple *shake_for_weather_t = dict_find(iter, KEY_SHAKE_FOR_WEATHER);
-
-  if (show_weather_t) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_WEATHER received!");
-
-  	show_weather = show_weather_t->value->int8;
-
-  	persist_write_int(KEY_SHOW_WEATHER, show_weather);
-  }
 
   if (show_battery_t) {
   	APP_LOG(APP_LOG_LEVEL_INFO, "KEY_SHOW_BATTERY received!");
@@ -278,12 +263,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   } else {
 	layer_set_hidden(battery_layer, false);
   } 
-
-  if (show_weather == 0) {
-	layer_set_hidden(weather_layer, true);
-  } else {
-	layer_set_hidden(weather_layer, false);
-  }
 
   if (shake_for_weather == 0) {
   	layer_set_hidden(weather_layer, true);
@@ -371,10 +350,6 @@ static void main_window_load(Window *window) {
 	layer_add_child(weather_layer_unanimated, text_layer_get_layer(conditions_layer_unanimated));
 	layer_add_child(battery_layer, text_layer_get_layer(batt_layer));
 
-  	if (persist_exists(KEY_SHOW_WEATHER)) {
-      show_weather = persist_read_int(KEY_SHOW_WEATHER);
-  	}
-
   	if (persist_exists(KEY_SHOW_BATTERY)) {
   	  show_battery = persist_read_int(KEY_SHOW_BATTERY);
   	}
@@ -412,6 +387,19 @@ static void main_window_unload(Window *window) {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
+
+  // Update weather every 30 minutes
+  if(tick_time->tm_min % 30 == 0) {
+  // Begin dictionary
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+
+  // Add a key-value pair
+  dict_write_uint8(iter, 0, 0);
+
+  // Send the message!
+  app_message_outbox_send();
+}
 }
 
 static void tap_handler(AccelAxisType axis, int32_t direction) {

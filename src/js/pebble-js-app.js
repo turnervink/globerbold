@@ -73,7 +73,7 @@ function getWeather() {
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
-    console.log('PebbleKit JS ready! Weather');
+    console.log('PebbleKit JS ready! Getting weather.');
 
     // Get the initial weather
     getWeather();
@@ -83,7 +83,8 @@ Pebble.addEventListener('ready',
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
   function(e) {
-    console.log('AppMessage received!');
+    console.log('AppMessage received! Updating weather.');
+
   }                     
 );
 
@@ -105,7 +106,6 @@ Pebble.addEventListener('webviewclosed', function(e) {
 	
 	console.log('Sending data to Pebble.');
 	Pebble.sendAppMessage({
-		showWeather: configData.showWeather ? 1 : 0,
 		showBattery: configData.showBattery ? 1 : 0,
 		useCelsius: configData.useCelsius ? 1 : 0,
     shakeWeather: configData.shakeWeather ? 1 : 0
