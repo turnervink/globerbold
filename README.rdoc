@@ -1,1 +1,4 @@
-This is a ground-up rebuild (almost) of my watchface Glober Bold. I plan to add weather and configuration, but currently and using app logs to make sure my config choices are being parsed properly.
+Glober Bold
+
+Pebble watchface by Turner Vink
+www.turnervink.com

@@ -3,7 +3,7 @@
   "shortName": "Glober Bold",
   "longName": "Glober Bold",
   "companyName": "Turner Vink",
-  "versionLabel": "3.0",
+  "versionLabel": "3.1",
   "sdkVersion": "3",
   "targetPlatforms": ["aplite", "basalt"],
   "watchapp": {
