@@ -9,7 +9,7 @@
 
 static Window *s_main_window;
 static TextLayer *time_layer, *date_layer, *batt_layer, *temp_layer, *conditions_layer, *temp_layer_unanimated, *conditions_layer_unanimated;
-static GFont *time_font, *date_font, *batt_font, *temp_font;
+static GFont time_font, date_font, batt_font, temp_font;
 static Layer *weather_layer, *battery_layer, *weather_layer_unanimated;
 static bool show_battery = 1;
 static bool use_celsius = 0;
