@@ -1,3 +1,7 @@
+var Clay = require('pebble-clay');
+var clayConfig = require('./config.json');
+var clay = new Clay(clayConfig);
+
 Pebble.addEventListener('ready', function() {
 	console.log('PebbleKit JS Ready!');
 });
@@ -15,45 +19,50 @@ var xhrRequest = function (url, type, callback) {
 
 function locationSuccess(pos) {
   // Construct URL
-  var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude + '&APPID=2874bea34ea1f91820fa07af69939eea';
-	
+  var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude + '&APPID=81f7698a08587e08bb05373bab9f3710';
+
 	console.log("Lat is " + pos.coords.latitude);
 	console.log("Lon is " + pos.coords.longitude);
+	console.log(url);
 
   // Send request to forecast.io
-  xhrRequest(url, 'GET', 
+  xhrRequest(url, 'GET',
     function(responseText) {
       // responseText contains a JSON object with weather info
       var json = JSON.parse(responseText);
-	  console.log(JSON.parse(responseText));
+	  	console.log(JSON.parse(responseText));
 
-      var temperature = Math.round(((json.main.temp - 273.15) * 1.8) + 32);
-      console.log("Temperature in Fahrenheit is " + temperature);
-      
-      var temperaturec = Math.round(json.main.temp - 273.15);
-      console.log("Temperature in Celsius is " + temperaturec);
+			if (!json.main) {
+				console.error("No weather data returned!");
+			} else {
+	      var temperature = Math.round(((json.main.temp - 273.15) * 1.8) + 32);
+	      console.log("Temperature in Fahrenheit is " + temperature);
 
-      // Conditions
-      var conditions = json.weather[0].main;      
-      console.log("Conditions are " + conditions);
-			
-      // Assemble dictionary using our keys
-      var dictionary = {
-        "KEY_TEMPERATURE": temperature,
-		    "KEY_TEMPERATURE_IN_C": temperaturec,
-		    "KEY_CONDITIONS": conditions,
-      };
+	      var temperaturec = Math.round(json.main.temp - 273.15);
+	      console.log("Temperature in Celsius is " + temperaturec);
 
-      // Send to Pebble
-      Pebble.sendAppMessage(dictionary,
-        function(e) {
-          console.log("Weather info sent to Pebble successfully!");
-        },
-        function(e) {
-          console.log("Error sending weather info to Pebble!");
-        }
-      );
-    }      
+	      // Conditions
+	      var conditions = json.weather[0].main;
+	      console.log("Conditions are " + conditions);
+
+	      // Assemble dictionary using our keys
+	      var dictionary = {
+	        "KEY_TEMPERATURE": temperature,
+			    "KEY_TEMPERATURE_IN_C": temperaturec,
+			    "KEY_CONDITIONS": conditions,
+	      };
+
+	      // Send to Pebble
+	      Pebble.sendAppMessage(dictionary,
+	        function(e) {
+	          console.log("Weather info sent to Pebble successfully!");
+	        },
+	        function(e) {
+	          console.log("Error sending weather info to Pebble!");
+	        }
+	      );
+			}
+    }
   );
 }
 
@@ -70,7 +79,7 @@ function getWeather() {
 }
 
 // Listen for when the watchface is opened
-Pebble.addEventListener('ready', 
+Pebble.addEventListener('ready',
   function(e) {
     console.log('PebbleKit JS ready! Getting weather.');
 
@@ -84,7 +93,7 @@ Pebble.addEventListener('appmessage',
   function(e) {
     console.log('AppMessage received! Updating weather.');
 
-  }                     
+  }
 );
 
 // Configuration
@@ -102,7 +111,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
 	console.log('Configuration page returned: ' + JSON.stringify(configData));
 
-	
+
 	console.log('Sending data to Pebble.');
 	Pebble.sendAppMessage({
 		showBattery: configData.showBattery ? 1 : 0,
