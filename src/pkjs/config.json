@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "size": 1,
+        "id": "main-heading",
+        "defaultValue": "<p style='text-align:center;'>Glober Bold</p>"
+      }
+    ]
+  },
+
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "toggle",
+        "messageKey": "KEY_SHOW_BATTERY",
+        "label": "Show battery level",
+        "defaultValue": true
+      },
+      {
+        "type": "toggle",
+        "messageKey": "useCelsius",
+        "label": "Use Celsius",
+        "defaultValue": false
+      },
+      {
+        "type": "toggle",
+        "messageKey": "KEY_SHAKE_FOR_WEATHER",
+        "label": "Shake to show weather",
+        "defaultValue": true
+      }
+    ]
+  },
+
+  {
+  "type": "submit",
+  "defaultValue": "Save"
+  }
+]

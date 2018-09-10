@@ -1,11 +1,11 @@
 #include <pebble.h>
 
-#define KEY_SHOW_BATTERY 1
+/*#define KEY_SHOW_BATTERY 1
 #define KEY_USE_CELSIUS 2
 #define KEY_TEMPERATURE 3
 #define KEY_TEMPERATURE_IN_C 4
 #define KEY_CONDITIONS 5
-#define KEY_SHAKE_FOR_WEATHER 6
+#define KEY_SHAKE_FOR_WEATHER 6*/
 
 static Window *s_main_window;
 static TextLayer *time_layer, *date_layer, *batt_layer, *temp_layer, *conditions_layer, *temp_layer_unanimated, *conditions_layer_unanimated;
@@ -17,11 +17,11 @@ static bool shake_for_weather = 1;
 
 static void battery_handler(BatteryChargeState new_state) {
   static char s_battery_buffer[32];
-	
+
 	bool charging = new_state.is_charging;
 	bool plugged = new_state.is_plugged;
 	int chargePercent = new_state.charge_percent;
-	
+
 	if(charging == true) {
 		#ifdef PBL_COLOR
 			text_layer_set_text_color(batt_layer, GColorCyan);
@@ -45,7 +45,7 @@ static void battery_handler(BatteryChargeState new_state) {
 			#else
 				text_layer_set_text_color(batt_layer, GColorWhite);
 			#endif
-			
+
 			snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", new_state.charge_percent);
   		text_layer_set_text(batt_layer, s_battery_buffer);
 		} else if(chargePercent > 60) {
@@ -54,7 +54,7 @@ static void battery_handler(BatteryChargeState new_state) {
 			#else
 				text_layer_set_text_color(batt_layer, GColorWhite);
 			#endif
-				
+
 			snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", new_state.charge_percent);
   		text_layer_set_text(batt_layer, s_battery_buffer);
 		} else if(chargePercent > 40) {
@@ -63,7 +63,7 @@ static void battery_handler(BatteryChargeState new_state) {
 			#else
 				text_layer_set_text_color(batt_layer, GColorWhite);
 			#endif
-				
+
 			snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", new_state.charge_percent);
   		text_layer_set_text(batt_layer, s_battery_buffer);
 		} else if(chargePercent > 20) {
@@ -72,7 +72,7 @@ static void battery_handler(BatteryChargeState new_state) {
 			#else
 				text_layer_set_text_color(batt_layer, GColorWhite);
 			#endif
-				
+
 			snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", new_state.charge_percent);
   		text_layer_set_text(batt_layer, s_battery_buffer);
 		} else if(chargePercent > 10) {
@@ -81,7 +81,7 @@ static void battery_handler(BatteryChargeState new_state) {
 			#else
 				text_layer_set_text_color(batt_layer, GColorWhite);
 			#endif
-				
+
 			snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", new_state.charge_percent);
   		text_layer_set_text(batt_layer, s_battery_buffer);
 		} else if(chargePercent <= 10) {
@@ -90,7 +90,7 @@ static void battery_handler(BatteryChargeState new_state) {
 			#else
 				text_layer_set_text_color(batt_layer, GColorWhite);
 			#endif
-			
+
 			snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", new_state.charge_percent);
   		text_layer_set_text(batt_layer, "Low");
 		}
@@ -101,22 +101,22 @@ void on_animation_stopped(Animation *anim, bool finished, void *context) {
     //Free the memory used by the Animation
     property_animation_destroy((PropertyAnimation*) anim);
 }
- 
+
 void animate_layer(Layer *layer, GRect *start, GRect *finish, int duration, int delay) {
     //Declare animation
     PropertyAnimation *anim = property_animation_create_layer_frame(layer, start, finish);
- 
+
     //Set characteristics
     animation_set_duration((Animation*) anim, duration);
     animation_set_delay((Animation*) anim, delay);
- 
+
     //Set stopped handler to free memory
     AnimationHandlers handlers = {
         //The reference to the stopped handler is the only one in the array
         .stopped = (AnimationStoppedHandler) on_animation_stopped
     };
     animation_set_handlers((Animation*) anim, handlers, NULL);
- 
+
     //Start animation!
     animation_schedule((Animation*) anim);
 }
@@ -124,11 +124,11 @@ void animate_layer(Layer *layer, GRect *start, GRect *finish, int duration, int 
 static void update_time() {
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
-  
+
   static char time_buffer[] = "00:00";
 	static char date_buffer[] = "WWW DD";
 	static char week_buffer[] = "WWW";
-  
+
   if(clock_is_24h_style() == true) {
     strftime(time_buffer, sizeof("00:00"), "%H:%M", tick_time);
   } else {
@@ -154,7 +154,7 @@ static void update_time() {
   	} else {
   		strftime(date_buffer, sizeof("WWW DD"), "%a %e", tick_time);
   	}
-	
+
 	text_layer_set_text(time_layer, time_buffer);
 	text_layer_set_text(date_layer, date_buffer);
 
@@ -260,7 +260,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	layer_set_hidden(battery_layer, true);
   } else {
 	layer_set_hidden(battery_layer, false);
-  } 
+  }
 
   if (shake_for_weather == 0) {
   	layer_set_hidden(weather_layer, true);
@@ -290,19 +290,19 @@ static void main_window_load(Window *window) {
 	weather_layer = layer_create(GRect(0, 0, 144, 168));
 	battery_layer = layer_create(GRect(0, 0, 144, 168));
 	weather_layer_unanimated = layer_create(GRect(0, 0, 144, 168));
-	
+
 	time_layer = text_layer_create(GRect(0, 50, 132, 163));
 	text_layer_set_text_color(time_layer, GColorWhite);
 	text_layer_set_background_color(time_layer, GColorClear);
 	text_layer_set_font(time_layer, time_font);
 	text_layer_set_text_alignment(time_layer, GTextAlignmentRight);
-	
+
 	date_layer = text_layer_create(GRect(0, 90, 130, 163));
 	text_layer_set_text_color(date_layer, GColorWhite);
 	text_layer_set_background_color(date_layer, GColorClear);
 	text_layer_set_font(date_layer, date_font);
 	text_layer_set_text_alignment(date_layer, GTextAlignmentRight);
-	
+
 	batt_layer = text_layer_create(GRect(0, 43, 130, 163));
 	text_layer_set_text_color(batt_layer, GColorWhite);
 	text_layer_set_background_color(batt_layer, GColorClear);
@@ -336,7 +336,7 @@ static void main_window_load(Window *window) {
 	text_layer_set_font(conditions_layer_unanimated, batt_font);
 	text_layer_set_text_alignment(conditions_layer_unanimated, GTextAlignmentRight);
 	text_layer_set_text(conditions_layer_unanimated, "Weather");
-	
+
 	layer_add_child(window_get_root_layer(window), weather_layer);
 	layer_add_child(window_get_root_layer(window), weather_layer_unanimated);
 	layer_add_child(window_get_root_layer(window), battery_layer);
@@ -370,7 +370,7 @@ static void main_window_unload(Window *window) {
 	fonts_unload_custom_font(date_font);
 	fonts_unload_custom_font(batt_font);
 	fonts_unload_custom_font(temp_font);
-	
+
 	text_layer_destroy(time_layer);
 	text_layer_destroy(date_layer);
 	text_layer_destroy(batt_layer);
@@ -410,14 +410,14 @@ static void tap_handler(AccelAxisType axis, int32_t direction) {
 
 static void init() {
   s_main_window = window_create();
-	
+
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
     .unload = main_window_unload
   });
 
   window_stack_push(s_main_window, true);
-	
+
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   battery_state_service_subscribe(battery_handler);
   accel_tap_service_subscribe(tap_handler);
@@ -430,7 +430,7 @@ static void init() {
 
 static void deinit() {
   window_destroy(s_main_window);
-	
+
   tick_timer_service_unsubscribe();
   battery_state_service_unsubscribe();
 }
